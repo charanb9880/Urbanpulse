@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+.next/
+*.log
+.env
+.env.local
+.DS_Store
+venv/
+__pycache__*
+*.db
+*.sqlite3
+cache/
+backend/ml_engine/cache/

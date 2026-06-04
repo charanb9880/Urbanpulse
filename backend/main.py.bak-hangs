@@ -1,0 +1,213 @@
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, EmailStr
+from typing import List, Optional
+from datetime import datetime, timedelta
+# Removed jose
+import hashlib
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Initialize FastAPI app
+app = FastAPI(title="UrbanPulse AI API", version="1.0.0")
+
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000", "http://127.0.0.1:3001"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Security settings
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+# Password hashing (using simple SHA256 for local dev due to bcrypt hanging on macOS)
+
+# In-memory storage (replace with PostgreSQL in production)
+users_db = {}
+incidents_db = {}
+next_user_id = 1
+next_incident_id = 1
+
+# Pydantic models
+class UserCreate(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+    role: str = "citizen"
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
+    role: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class IncidentCreate(BaseModel):
+    title: str
+    description: str
+    category: str
+    location: str
+    severity: str = "Medium"
+    image_url: Optional[str] = None
+
+class IncidentResponse(BaseModel):
+    id: int
+    title: str
+    description: str
+    category: str
+    location: str
+    severity: str
+    status: str = "Reported"
+    image_url: Optional[str] = None
+    verified: bool = False
+    created_at: datetime
+    user_id: int
+
+class AIAnalysis(BaseModel):
+    severity_prediction: str
+    confidence_score: float
+    impact_assessment: str
+    affected_radius: float
+    priority_level: str
+
+# Helper functions
+def verify_password(plain_password, hashed_password):
+    return get_password_hash(plain_password) == hashed_password
+
+def get_password_hash(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    import json
+    import base64
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire.isoformat()})
+    return base64.b64encode(json.dumps(to_encode).encode()).decode()
+
+def get_user(email: str):
+    for user in users_db.values():
+        if user["email"] == email:
+            return user
+    return None
+
+def authenticate_user(email: str, password: str):
+    user = get_user(email)
+    if not user:
+        return False
+    if not verify_password(password, user["hashed_password"]):
+        return False
+    return user
+
+# API routes
+@app.get("/")
+async def root():
+    return {"message": "UrbanPulse AI API is running!", "version": "1.0.0"}
+
+@app.post("/api/auth/signup", response_model=UserResponse)
+async def signup(user: UserCreate):
+    global next_user_id
+    if get_user(user.email):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
+        )
+    hashed_password = get_password_hash(user.password)
+    new_user = {
+        "id": next_user_id,
+        "name": user.name,
+        "email": user.email,
+        "hashed_password": hashed_password,
+        "role": user.role,
+        "created_at": datetime.utcnow()
+    }
+    users_db[next_user_id] = new_user
+    next_user_id += 1
+    return UserResponse(
+        id=new_user["id"],
+        name=new_user["name"],
+        email=new_user["email"],
+        role=new_user["role"]
+    )
+
+@app.post("/api/auth/login", response_model=Token)
+async def login(user_login: UserLogin):
+    user = authenticate_user(user_login.email, user_login.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user["email"], "role": user["role"]},
+        expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.get("/api/incidents", response_model=List[IncidentResponse])
+async def get_incidents():
+    return list(incidents_db.values())
+
+@app.post("/api/incidents", response_model=IncidentResponse)
+async def create_incident(incident: IncidentCreate):
+    global next_incident_id
+    # Mock user ID for now (replace with actual auth in production)
+    mock_user_id = 1
+    new_incident = {
+        "id": next_incident_id,
+        "title": incident.title,
+        "description": incident.description,
+        "category": incident.category,
+        "location": incident.location,
+        "severity": incident.severity,
+        "status": "Reported",
+        "image_url": incident.image_url,
+        "verified": False,
+        "created_at": datetime.utcnow(),
+        "user_id": mock_user_id
+    }
+    incidents_db[next_incident_id] = new_incident
+    next_incident_id += 1
+    return new_incident
+
+@app.get("/api/incidents/{incident_id}", response_model=IncidentResponse)
+async def get_incident(incident_id: int):
+    incident = incidents_db.get(incident_id)
+    if not incident:
+        raise HTTPException(status_code=404, detail="Incident not found")
+    return incident
+
+@app.post("/api/incidents/{incident_id}/analyze", response_model=AIAnalysis)
+async def analyze_incident(incident_id: int):
+    # Mock AI analysis (replace with actual OpenAI/AI integration)
+    return AIAnalysis(
+        severity_prediction="Medium",
+        confidence_score=0.87,
+        impact_assessment="Potential traffic disruption in 500m radius",
+        affected_radius=0.5,
+        priority_level="P2"
+    )
+
+@app.get("/api/health")
+async def health_check():
+    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
