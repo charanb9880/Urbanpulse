@@ -5,6 +5,7 @@ interface SignupData {
   email: string;
   password: string;
   role: string;
+  phone?: string;
 }
 
 interface LoginData {
@@ -76,6 +77,18 @@ export const api = {
   async login(data: LoginData) {
     return post('/api/auth/login', data);
   },
+  async googleLogin(credential: string) {
+    return post('/api/auth/google', { credential });
+  },
+  async forgotPassword(email: string) {
+    return post('/api/auth/forgot-password', { email });
+  },
+  async verifyOtp(email: string, code: string) {
+    return post('/api/auth/verify-otp', { email, code });
+  },
+  async resetPassword(email: string, code: string, new_password: string) {
+    return post('/api/auth/reset-password', { email, code, new_password });
+  },
 
   // ── Incidents ────────────────────────────────
   async getIncidents() {
@@ -89,6 +102,9 @@ export const api = {
   },
   async analyzeIncident(id: number) {
     return post(`/api/incidents/${id}/analyze`);
+  },
+  async verifyImage(category: string, image_url: string) {
+    return post(`/api/incidents/verify_image`, { category, image_url });
   },
   async verifyIncident(id: number) {
     return post(`/api/incidents/${id}/verify`);
@@ -184,6 +200,9 @@ export const api = {
   async generateInsights() {
     return get('/generate-insights');
   },
+  async getCityBriefing() {
+    return get('/api/city_briefing');
+  },
   async getModelMetrics() {
     return get('/model-metrics');
   },
@@ -228,7 +247,61 @@ export const api = {
   },
 
   // ── Chat ─────────────────────────────────────
-  async chat(message: string) {
-    return post('/api/chat', { message });
+  async chat(message: string, context?: any) {
+    return post('/api/chat', { message, context });
+  },
+
+  // ── Emergency Chain Intelligence & Golden Hour ────
+  async getEmergencyChains() {
+    return get('/api/emergency/chains');
+  },
+  async getEmergencyChain(iid: number) {
+    return get(`/api/emergency/chains/${iid}`);
+  },
+  async resolveEmergencyChain(iid: number) {
+    return post(`/api/emergency/chains/${iid}/resolve`);
+  },
+  async getEmergencyAlerts() {
+    return get('/api/emergency/alerts');
+  },
+  async configureHospitals(distance: number, trauma: number, icu: number) {
+    return post('/api/emergency/hospital/config', { distance, trauma, icu });
+  },
+  async simulateEmergencyIncident(data: { title: string; description: string; category: string; location: string; severity: string; lat?: number; lng?: number }) {
+    return post('/api/emergency/simulate-accident', data);
+  },
+
+  // ── Urban Decision Simulator (UDS) ────
+  async simulateDecision(data: { scenario_type: string; title: string; location: string; duration_hours: number; affected_area: string; parameters: any; creator?: string }) {
+    return post('/api/uds/simulate', data);
+  },
+  async getDecisionHistory() {
+    return get('/api/uds/history');
+  },
+  async getDecisionDetails(sid: number) {
+    return get(`/api/uds/simulations/${sid}`);
+  },
+  async compareDecisions(id1: number, id2: number) {
+    return post('/api/uds/compare', { id1, id2 });
+  },
+  async getUDSMemory(scenario_type: string, location: string) {
+    return get(`/api/uds/memory?scenario_type=${encodeURIComponent(scenario_type)}&location=${encodeURIComponent(location)}`);
+  },
+
+  // ── Urban Mobility Pulse Network (UMPN) ────
+  async getUmpnSettings(userId: number) {
+    return get(`/api/umpn/settings/${userId}`);
+  },
+  async updateUmpnSettings(userId: number, enabled: boolean) {
+    return post('/api/umpn/settings', { user_id: userId, smart_journey_enabled: enabled });
+  },
+  async getUmpnIntelligence() {
+    return get('/api/umpn/intelligence');
+  },
+  async getUmpnSimulatedTelemetry() {
+    return get('/api/umpn/telemetry/simulate');
+  },
+  async getAdminUsers() {
+    return get('/api/admin/users');
   },
 };

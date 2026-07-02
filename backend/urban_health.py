@@ -1,3 +1,4 @@
+
 """
 Urban Health Engine — composite city health score from traffic, weather,
 incidents, and accessibility.

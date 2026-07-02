@@ -1,0 +1,36 @@
+Project Title
+UrbanPulseAI - Smart Traffic Intelligence and Decision Support System
+Team Members
+	•	Aishwarya Shastri – 4PS23CB002
+	•	Ashutosh Raj – 4PS23CB005
+	•	Charan B – 4PS23CB008
+	•	Diya Gowda S S – 4PS24CB403
+Guide Name:
+Prof. Puttaswamy B S
+Assistant Professor Department of Computer Science and Business Systems
+Project Description:
+UrbanPulseAI is an intelligent traffic management and decision support system developed to enhance urban mobility by integrating traffic prediction, incident management, and route optimization within a single platform. The system enables citizens to report road incidents such as accidents, potholes, flooding, road blockages, and fallen trees, while automatically verifying uploaded images using Artificial Intelligence to improve the reliability of reported information. It predicts traffic congestion, recommends optimized and emergency-aware travel routes, and provides a centralized dashboard that assists transportation authorities in monitoring traffic conditions, analyzing incident impacts, and making informed decisions. An integrated AI Copilot further enhances user interaction by providing contextual guidance and real-time traffic-related assistance, contributing to safer, smarter, and more efficient urban transportation management.
+
+
+Technologies Used:
+
+	•	Python 
+	•	FastAPI 
+	•	Next.js 
+	•	React.js 
+	•	TypeScript 
+	•	SQLite 
+	•	PyTorch 
+	•	OpenStreetMap (OSM) 
+	•	Leaflet.js 
+	•	ONNX Runtime
+
+Project Outcomes:
+
+	•	Developed an integrated smart traffic management and decision support platform for urban mobility. 
+	•	Enabled AI-based verification of citizen-reported road incidents to improve report authenticity and reduce false reporting. 
+	•	Implemented Graph Neural Network-based traffic prediction for proactive congestion analysis and traffic management. 
+	•	Generated optimized and emergency-aware route recommendations using predicted traffic conditions and verified incidents. 
+	•	Provided a centralized authority dashboard for real-time traffic monitoring, consequence analysis, and decision support. 
+	•	Enhanced citizen engagement through an interactive incident reporting portal and AI-powered Copilot assistance.
+

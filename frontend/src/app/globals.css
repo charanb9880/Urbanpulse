@@ -50,3 +50,45 @@ html, body {
 .leaflet-popup-tip {
   display: none !important;
 }
+
+/* Custom Polyline & Marker Animations */
+@keyframes emergency-flow {
+  0% { stroke-dashoffset: 40; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.emergency-route-primary {
+  stroke-dasharray: 12, 12;
+  animation: emergency-flow 1.2s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.8));
+}
+
+.emergency-route-secondary {
+  stroke-dasharray: 8, 12;
+  animation: emergency-flow 2s linear infinite;
+  filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.6));
+}
+
+@keyframes marker-pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70% { transform: scale(1.15); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.critical-node-pulse {
+  animation: marker-pulse 1.8s infinite;
+}
+
+.custom-tooltip {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border-radius: 12px !important;
+  padding: 8px 12px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+}
+
+.custom-tooltip::before {
+  border-top-color: rgba(15, 23, 42, 0.95) !important;
+}
+

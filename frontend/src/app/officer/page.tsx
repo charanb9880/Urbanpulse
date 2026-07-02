@@ -199,9 +199,7 @@ function OfficerContent() {
               >
                 Dispatch Emergency Route (Silk Board)
               </button>
-              <button className="w-full py-3 bg-slate-100 rounded-xl text-sm font-semibold hover:bg-slate-200 transition-colors text-slate-800">
-                Talk to AI Copilot
-              </button>
+
             </div>
           </div>
 

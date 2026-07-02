@@ -7,7 +7,7 @@ import sqlite3
 import os
 import json
 import hashlib
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "urbanpulse.db")
@@ -51,9 +51,12 @@ def init_db():
         verified INTEGER NOT NULL DEFAULT 0,
         verification_count INTEGER NOT NULL DEFAULT 0,
         ai_analysis_json TEXT,
+        ai_image_verification_json TEXT,
+        duplicate_of_id INTEGER,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL,
-        FOREIGN KEY (user_id) REFERENCES users(id)
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        FOREIGN KEY (duplicate_of_id) REFERENCES incidents(id)
     );
 
     CREATE TABLE IF NOT EXISTS predictions (
@@ -100,14 +103,79 @@ def init_db():
         penalty REAL NOT NULL DEFAULT 0.0,
         fetched_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS simulated_decisions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        scenario_type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        location TEXT NOT NULL,
+        duration_hours INTEGER NOT NULL,
+        affected_area TEXT NOT NULL,
+        parameters_json TEXT,
+        mobility_score INTEGER NOT NULL,
+        citizen_score INTEGER NOT NULL,
+        emergency_score INTEGER NOT NULL,
+        risk_score INTEGER NOT NULL,
+        results_json TEXT NOT NULL,
+        alternative_strategy TEXT NOT NULL,
+        ai_reasoning TEXT NOT NULL,
+        creator TEXT NOT NULL,
+        created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS umpn_settings (
+        user_id INTEGER PRIMARY KEY REFERENCES users(id),
+        smart_journey_enabled INTEGER DEFAULT 0,
+        updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS umpn_journeys (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER REFERENCES users(id),
+        start_area TEXT NOT NULL,
+        end_area TEXT NOT NULL,
+        route_taken TEXT NOT NULL,
+        duration_mins INTEGER NOT NULL,
+        delay_mins INTEGER NOT NULL,
+        deviation_detected INTEGER DEFAULT 0,
+        created_at TEXT NOT NULL
+    );
     """)
-    conn.commit()
+
+    # Handle schema updates for existing database instances safely
+    try:
+        conn.execute("ALTER TABLE incidents ADD COLUMN ai_image_verification_json TEXT")
+    except sqlite3.OperationalError:
+        pass # Column already exists
+    
+    try:
+        conn.execute("ALTER TABLE incidents ADD COLUMN duplicate_of_id INTEGER REFERENCES incidents(id)")
+    except sqlite3.OperationalError:
+        pass # Column already exists
 
     try:
         conn.execute("ALTER TABLE incidents ADD COLUMN ai_analysis_json TEXT")
-        conn.commit()
+    except sqlite3.OperationalError:
+        pass # already exists
+
+    try:
+        conn.execute("ALTER TABLE incidents ADD COLUMN user_id INTEGER")
     except sqlite3.OperationalError:
         pass
+
+    try:
+        conn.execute("ALTER TABLE users ADD COLUMN phone TEXT")
+    except sqlite3.OperationalError:
+        pass
+
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS otps (
+        email_or_phone TEXT PRIMARY KEY,
+        otp TEXT NOT NULL,
+        expires_at TEXT NOT NULL
+    );
+    """)
+
     conn.commit()
 
 
@@ -135,12 +203,12 @@ def row_to_dict(row: sqlite3.Row) -> dict:
 # ──────────────────────────────────────────────
 # Users
 # ──────────────────────────────────────────────
-def create_user(name: str, email: str, password: str, role: str = "citizen") -> dict:
+def create_user(name: str, email: str, password: str, role: str = "citizen", phone: Optional[str] = None) -> dict:
     conn = get_conn()
     ts = now_iso()
     cur = conn.execute(
-        "INSERT INTO users (name, email, hashed_password, role, created_at) VALUES (?,?,?,?,?)",
-        (name, email.strip().lower(), hash_password(password), role, ts),
+        "INSERT INTO users (name, email, hashed_password, role, phone, created_at) VALUES (?,?,?,?,?,?)",
+        (name, email.strip().lower(), hash_password(password), role, phone, ts),
     )
     conn.commit()
     return get_user_by_id(cur.lastrowid)
@@ -164,6 +232,46 @@ def verify_password(user: dict, password: str) -> bool:
     return user["hashed_password"] == hash_password(password)
 
 
+def save_otp(email_or_phone: str, otp: str, expiry_minutes: int = 10) -> None:
+    conn = get_conn()
+    expires_at = (datetime.utcnow() + timedelta(minutes=expiry_minutes)).isoformat()
+    conn.execute(
+        "INSERT OR REPLACE INTO otps (email_or_phone, otp, expires_at) VALUES (?, ?, ?)",
+        (email_or_phone.strip().lower(), otp.strip(), expires_at),
+    )
+    conn.commit()
+
+
+def verify_otp(email_or_phone: str, otp: str) -> bool:
+    conn = get_conn()
+    row = conn.execute(
+        "SELECT * FROM otps WHERE email_or_phone=? AND otp=?",
+        (email_or_phone.strip().lower(), otp.strip()),
+    ).fetchone()
+    if not row:
+        return False
+    now = datetime.utcnow().isoformat()
+    if row["expires_at"] < now:
+        return False
+    return True
+
+
+def update_user_password(email: str, new_password: str) -> bool:
+    conn = get_conn()
+    cur = conn.execute(
+        "UPDATE users SET hashed_password=? WHERE email=?",
+        (hash_password(new_password), email.strip().lower()),
+    )
+    conn.commit()
+    return cur.rowcount > 0
+
+
+def get_all_users() -> List[dict]:
+    conn = get_conn()
+    rows = conn.execute("SELECT * FROM users").fetchall()
+    return [row_to_dict(r) for r in rows]
+
+
 # ──────────────────────────────────────────────
 # Incidents
 # ──────────────────────────────────────────────
@@ -177,15 +285,17 @@ def create_incident(
     lat: Optional[float] = None,
     lng: Optional[float] = None,
     ai_analysis_json: Optional[str] = None,
+    ai_image_verification_json: Optional[str] = None,
+    duplicate_of_id: Optional[int] = None,
     user_id: int = 1,
-) -> dict:
+) -> Dict[str, Any]:
     conn = get_conn()
-    ts = now_iso()
+    now = now_iso()
     cur = conn.execute(
         """INSERT INTO incidents
-           (title, description, category, location, lat, lng, severity, status, image_url, verified, verification_count, ai_analysis_json, user_id, created_at, updated_at)
-           VALUES (?,?,?,?,?,?,?,?,?,0,0,?,?,?,?)""",
-        (title, description, category, location, lat, lng, severity, "Reported", image_url, ai_analysis_json, user_id, ts, ts),
+           (title, description, category, location, severity, status, image_url, lat, lng, ai_analysis_json, ai_image_verification_json, duplicate_of_id, created_at, updated_at, user_id)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        (title, description, category, location, severity, "Reported", image_url, lat, lng, ai_analysis_json, ai_image_verification_json, duplicate_of_id, now, now, user_id),
     )
     conn.commit()
     return get_incident(cur.lastrowid)
@@ -410,10 +520,14 @@ def get_latest_prediction(pred_type: str) -> Optional[dict]:
 # Seed data
 # ──────────────────────────────────────────────
 def seed_demo_users():
-    if get_user_by_email("citizen"):
-        return
-    create_user("Demo Citizen", "citizen", "citizen123", "citizen")
-    create_user("Demo Authority", "authority", "authority123", "authority")
+    if not get_user_by_email("citizen"):
+        create_user("Demo Citizen", "citizen", "citizen123", "citizen")
+    if not get_user_by_email("authority"):
+        create_user("Demo Authority", "authority", "authority123", "authority")
+    if not get_user_by_email("citizen@urbanpulse.ai"):
+        create_user("Demo Citizen", "citizen@urbanpulse.ai", "citizen123", "citizen")
+    if not get_user_by_email("authority@urbanpulse.ai"):
+        create_user("Demo Authority", "authority@urbanpulse.ai", "authority123", "authority")
 
 
 # Init on import

@@ -3,14 +3,24 @@ import dynamic from 'next/dynamic';
 import React from 'react';
 import { AlertTriangle } from 'lucide-react';
 
-const GraphMap = dynamic(() => import('./GraphMap'), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-full rounded-2xl bg-slate-100 animate-pulse flex items-center justify-center">
-      <span className="text-slate-400">Loading Intelligence Map...</span>
-    </div>
-  ),
-});
+const GraphMap = dynamic(
+  () =>
+    import('@/components/GraphMap').catch((err) => {
+      console.error('Failed to load GraphMap chunk, reloading page...', err);
+      if (typeof window !== 'undefined') {
+        window.location.reload();
+      }
+      return { default: () => null };
+    }),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full rounded-2xl bg-slate-100 animate-pulse flex items-center justify-center">
+        <span className="text-slate-400">Loading Intelligence Map...</span>
+      </div>
+    ),
+  }
+);
 
 class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
   constructor(props: {children: React.ReactNode}) {

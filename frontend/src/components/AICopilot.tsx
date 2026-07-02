@@ -23,11 +23,10 @@ export default function AICopilot() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
-  // Only show if user is authenticated and not on auth pages
-  if (!user || pathname?.startsWith('/auth') || pathname?.startsWith('/signup') || pathname?.startsWith('/login')) {
+  // Only show if user is authenticated and not on auth or authority pages
+  if (!user || pathname?.startsWith('/auth') || pathname?.startsWith('/signup') || pathname?.startsWith('/login') || pathname?.startsWith('/authority')) {
     return null;
   }
-
   const handleSend = async () => {
     if (!input.trim()) return;
     const msg = input.trim();
@@ -35,17 +34,35 @@ export default function AICopilot() {
     setMessages(prev => [...prev, { role: 'user', text: msg }]);
     setLoading(true);
     
+    let context: any = {};
     try {
-      const res = await api.chat(msg);
+      const stored = localStorage.getItem('urbanpulse_route_context');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Date.now() - parsed.timestamp < 15 * 60 * 1000) {
+          context = { ...context, ...parsed };
+        }
+      }
+      const verifStored = localStorage.getItem('urbanpulse_verification_context');
+      if (verifStored) {
+        const parsed = JSON.parse(verifStored);
+        if (Date.now() - parsed.timestamp < 15 * 60 * 1000) {
+          context.verification = parsed;
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    try {
+      const res = await api.chat(msg, context);
       setMessages(prev => [...prev, { role: 'ai', text: res.reply }]);
     } catch (error) {
       setMessages(prev => [...prev, { role: 'ai', text: 'Sorry, I am currently unable to connect to the intelligence network.' }]);
     } finally {
       setLoading(false);
     }
-  };
-
-  return (
+  };  return (
     <>
       {/* Floating Action Button */}
       <motion.button

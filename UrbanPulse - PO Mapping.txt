@@ -1,0 +1,200 @@
+
+MINI PROJECT (P22CBMP607) REPORT – 2025 - 2026
+Project Title:
+UrbanPulseAI – Smart Traffic Intelligence and Decision Support System
+Project Type:
+Mini Project
+Project Domain:
+Artificial Intelligence | Machine Learning 
+Problem Statement
+Rapid urbanization, population growth, and the increasing number of vehicles have made traffic congestion and road incidents major challenges in modern cities. Accidents, flooding, potholes, road blockages, and other unexpected events frequently disrupt traffic flow, resulting in increased travel time, fuel consumption, environmental pollution, and delays in emergency response. Existing transportation systems mainly focus on individual functionalities such as traffic prediction, navigation, or incident reporting, leading to fragmented solutions that lack coordinated traffic management. In addition, the absence of intelligent incident verification, emergency-aware routing, and integrated decision-support mechanisms limits the reliability of citizen-generated reports and reduces the ability of transportation authorities to respond effectively. Therefore, there is a need for an intelligent transportation framework that integrates traffic prediction, AI-assisted incident verification, optimized and emergency-aware routing, consequence analysis, and authority-oriented decision support to enable efficient, reliable, and proactive urban traffic management.
+Project 
+Objectives
+	•	To predict future traffic conditions using Graph Neural Networks by capturing both spatial dependencies and temporal variations within urban road networks.
+	•	To provide intelligent route recommendations that assist commuters in selecting efficient travel paths based on predicted traffic conditions.
+	•	To enable citizens to report traffic-related incidents and automatically verify the authenticity of uploaded incident images using AI-based image analysis techniques.
+	•	To support traffic authorities with real-time traffic intelligence and decision-support mechanisms for effective congestion and incident management.
+	•	To contribute towards safer, smarter, and more sustainable urban transportation through proactive and data-driven traffic management.
+Software and Hardware Requirements
+Software Requirements
+Hardware Requirements
+Next.js, React, TypeScript, Tailwind CSS
+Intel Core i5 Processor or Higher
+FastAPI, Python
+Minimum 8 GB RAM
+SQLite
+256 GB Storage (SSD Recommended)
+OpenStreetMap, Leaflet, OSMnx, NetworkX
+Internet Connection
+PyTorch, ONNX Runtime, Python Libraries
+Graphics Processing Unit (Optional for AI Model Execution)
+Visual Studio Code, Git, npm
+Keyboard, Mouse, Monitor
+Windows, Linux, macOS (Local or Cloud)
+
+
+Project 
+Outcomes
+
+	•	Developed an integrated intelligent transportation platform that combines traffic prediction, incident management, route optimization, and decision support within a unified framework.
+	•	Improved the reliability of citizen-generated incident reports through Artificial Intelligence-based image verification, reducing false and misleading submissions.
+	•	Enabled proactive traffic management by predicting congestion patterns and generating optimized as well as emergency-aware route recommendations.
+	•	Empowered transportation authorities with a centralized dashboard for real-time traffic monitoring, consequence analysis, and data-driven decision-making.
+	•	Enhanced citizen engagement by providing an interactive incident reporting platform and AI-assisted guidance for traffic-related services.
+	•	Established a scalable and modular framework that supports future integration with real-time traffic data and smart city infrastructure, contributing to safer and more efficient urban mobility.
+
+MAPPING WITH COURSE OUTCOMES AND PROGRAM OUTCOMES (CO-POS MAPPING):
+COURSE OUTCOMES:
+CO1: Identify a real-world problem through literature survey and requirement analysis.
+CO2: Implement and evaluate an innovative solution using appropriate engineering principles and modern tools.
+CO3: Demonstrate teamwork, effective communication, project management, ethical practices, and technical documentation through successful project execution.
+PROGRAM SPECIFIC OUTCOMES (PSO’S) 
+PSO-1: Ability to apply critical thinking and problem-solving skills to develop software solutions using foundational knowledge of computer science, mathematics, science, management and humanities. 
+PSO-2: Train students with knowledge and practical skills in Systems Informatics courses and application development, empowering them to excel as techno-managerial professionals, entrepreneurs, researchers and lifelong learners.
+PROJECT CO-PO-PSO ARTICULATION MATRIX
+CO
+PO1
+PO2
+PO3
+PO4
+PO5
+PO6
+PO7
+PO8
+PO9
+PO10
+PO11
+PO12
+PSO1
+PSO2
+CO1
+3
+3
+2
+2
+2
+2
+1
+–
+1
+1
+–
+1
+3
+2
+CO2
+3
+2
+3
+3
+3
+2
+2
+1
+2
+2
+2
+2
+3
+3
+CO3
+–
+–
+2
+–
+1
+1
+–
+2
+3
+3
+3
+2
+2
+3
+
+JUSTIFICATION FOR CO-PO’S MAPPING: 
+PO
+Justification
+PO1
+UrbanPulseAI applies Artificial Intelligence, Machine Learning, and software engineering principles to develop an intelligent traffic management and decision support system.
+PO2
+The solution addresses real-world challenges such as traffic congestion, road incidents, and emergency response through an integrated intelligent transportation framework.
+PO3
+The platform integrates traffic prediction, AI-assisted incident verification, emergency-aware routing, consequence analysis, and authority decision support into a unified system.
+PO4
+The developed system was tested and evaluated using representative traffic scenarios to validate the performance and reliability of its integrated modules.
+PO5
+The solution was implemented using modern technologies including FastAPI, Next.js, React, PyTorch, OpenStreetMap, Leaflet, and ONNX Runtime.
+PO6
+The system improves public safety by enabling timely incident reporting, intelligent emergency routing, and informed traffic management.
+PO7
+The solution promotes sustainable urban mobility by reducing traffic congestion through predictive analytics and optimized route planning.
+PO8
+UrbanPulseAI ensures secure access, responsible handling of user-generated data, and AI-assisted verification to improve the trustworthiness of reported incidents.
+PO9
+The project was successfully developed through collaborative teamwork involving requirement analysis, system design, implementation, testing, and documentation.
+PO10
+The project outcomes were effectively communicated through technical documentation, reports, presentations, and demonstrations.
+PO11
+The project followed a structured development approach with proper planning, task management, implementation, and testing to achieve the project objectives.
+PO12
+The development of UrbanPulseAI involved learning and applying emerging technologies in Artificial Intelligence, Intelligent Transportation Systems, and Smart City applications.
+
+MAPPING WITH SUSTAINABLE DEVELOPMENT GOALS (SDGS):
+SDG
+Goal
+Contribution
+SDG 3
+Good Health and Well-Being
+Improves public safety by enabling intelligent incident reporting, AI-assisted incident verification, and emergency-aware route recommendations for timely emergency response.
+SDG 9
+Industry, Innovation and Infrastructure
+Strengthens intelligent transportation through Artificial Intelligence, Machine Learning, and traffic prediction.
+SDG 11
+Sustainable Cities and Communities
+Supports sustainable urban mobility through intelligent traffic prediction, optimized routing, citizen participation, and efficient traffic management.
+SDG 13
+Climate Action
+Contributes to environmental sustainability by reducing traffic congestion, travel delays, fuel consumption, and associated vehicular emissions through proactive traffic management.
+SDG 16
+Peace, Justice and Strong Institutions
+Promotes transparent and data-driven traffic governance by integrating citizen-generated incident reporting, AI-assisted verification, and authority-oriented decision support.
+
+PROJECT CONCLUSION:
+The UrbanPulseAI – Smart Traffic Intelligence and Decision Support System successfully demonstrates the application of Artificial Intelligence, Machine Learning, and modern software engineering techniques to address urban transportation challenges. The developed framework integrates traffic prediction, AI-assisted incident verification, optimized and emergency-aware routing, consequence analysis, and authority-oriented decision support within a unified platform. By combining these intelligent functionalities, the system enhances traffic management, improves emergency response, and supports efficient urban mobility through proactive and data-driven decision-making.
+
+The project contributes to SDG 3 (Good Health and Well-being), SDG 9 (Industry, Innovation and Infrastructure), SDG 11 (Sustainable Cities and Communities), SDG 13 (Climate Action), and SDG 16 (Peace, Justice and Strong Institutions) by promoting intelligent transportation, sustainable mobility, and transparent traffic governance. It also fulfills the identified Program Outcomes and Program Specific Outcomes by applying engineering knowledge, Artificial Intelligence, modern software development practices, teamwork, and problem-solving skills to develop a practical and scalable transportation solution. Overall, the project aligns with the principles of Outcome-Based Education (OBE) and demonstrates its technical, societal, and academic significance.
+
+STUDENT PROJECT BATCH LIST
+Sl. No.
+USN
+Name
+Signature
+1
+4PS23CB002
+Aishwarya Shastri
+
+2
+4PS23CB005
+Ashutosh Raj
+
+3
+4PS23CB008
+Charan B
+
+4
+4PS24CB403
+Diya Gowda S S
+
+
+                                                               
+
+Project Guide Name: Prof. Puttaswamy B S
+
+
+Project Guide Signature:
+
+
+
+

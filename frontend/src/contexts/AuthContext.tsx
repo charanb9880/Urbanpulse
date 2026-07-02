@@ -14,7 +14,8 @@ type AuthContextValue = {
   loading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string, role: string) => Promise<void>;
+  loginWithGoogle: (credential: string) => Promise<any>;
+  signup: (name: string, email: string, password: string, role: string, phone?: string) => Promise<void>;
   logout: () => void;
 };
 
@@ -52,8 +53,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(decodeToken(data.access_token));
   };
 
-  const signup = async (name: string, email: string, password: string, role: string) => {
-    await api.signup({ name, email, password, role });
+  const loginWithGoogle = async (credential: string) => {
+    const data = await api.googleLogin(credential);
+    window.localStorage.setItem('urbanpulse_token', data.access_token);
+    setUser(decodeToken(data.access_token));
+    return data; // return full response so callers can use role, is_new_user, etc.
+  };
+
+  const signup = async (name: string, email: string, password: string, role: string, phone?: string) => {
+    await api.signup({ name, email, password, role, phone });
     await login(email, password);
   };
 
@@ -70,6 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading,
         isAuthenticated: Boolean(user),
         login,
+        loginWithGoogle,
         signup,
         logout,
       }}
